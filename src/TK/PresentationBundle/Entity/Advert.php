@@ -51,10 +51,22 @@ class Advert
 
 
     /**
+    * @ORM\OneToOne(targetEntity="\TK\PresentationBundle\Entity\Image", cascade={"persist"})
+    * @ORM\JoinColumn(nullable=false)
+     */
+    private $image;
+
+
+    /**
      * Get id
      *
      * @return integer 
      */
+
+     /**
+   * @ORM\Column(name="published", type="boolean")
+   */
+    private $published = true;
 
     public function __construct()
     {
@@ -157,5 +169,49 @@ class Advert
     public function getContent()
     {
         return $this->content;
+    }
+
+    /**
+     * Set published
+     *
+     * @param boolean $published
+     * @return Advert
+     */
+    public function setPublished($published)
+    {
+        $this->published = $published;
+
+        return $this;
+    }
+
+    /**
+     * Get published
+     *
+     * @return boolean 
+     */
+    public function getPublished()
+    {
+        return $this->published;
+    }
+
+    /**
+     * Set image
+     *
+     * @param \TK\PresentationBundle\Entity\Image $image
+     * @return Advert
+     */
+    public function setImage(Image $image = null)
+    {
+        $this->image = $image;
+    }
+
+    /**
+     * Get image
+     *
+     * @return \TK\PresentationBundle\Entity\Image 
+     */
+    public function getImage()
+    {
+        return $this->image;
     }
 }

@@ -9,15 +9,16 @@
     <h1>Affichage d'une annonce</h1>
 
     <p>
-      {# On affiche tous les messages flash dont le nom est « info » #}
-      {% for message in app.session.flashbag.get('info') %}
-        <p>Message flash : {{ message }}</p>
-      {% endfor %}
+      {{ advert.id }} / {{ advert.title }}
+      {{ advert.content }}
+      {{ advert.author }}
+    <p>
+
+      {% if advert.image is not null %}
+      <img src="{{ advert.image.url }}" alt="{{ advert.image.alt }}">
+      {% endif %}
+
     </p>
 
-    <p>
-      Ici nous pourrons lire l'annonce ayant comme id : {{ id }}<br />
-      Mais pour l'instant, nous ne savons pas encore le faire, cela viendra !
-    </p>
   </body>
 </html>

@@ -8,6 +8,9 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
+use TK\PresentationBundle\Entity\Advert;
+use TK\PresentationBundle\Entity\Image;
+
 class AdvertController extends Controller
 {
 
@@ -60,25 +63,50 @@ class AdvertController extends Controller
 
   public function viewAction($id)
   {
-    // Ici, on récupérera l'annonce correspondante à l'id $id
+    {
+    // On récupère le repository
+     $advert = $this->getDoctrine()
+      ->getManager()
+      ->find('PresentationBundle:Advert', $id);
 
+    // $advert est donc une instance de OC\PlatformBundle\Entity\Advert
+    // ou null si l'id $id  n'existe pas, d'où ce if :
+    if (null === $advert) {
+      throw new NotFoundHttpException("L'annonce d'id ".$id." n'existe pas.");
+    }
+
+    // Le render ne change pas, on passait avant un tableau, maintenant un objet
     return $this->render('PresentationBundle:Advert:view.html.twig', array(
+      'advert' => $advert,
       'id' => $id
     ));
+  }
   }
 
   public function addAction(Request $request)
   {
+    $advert = new Advert();
+    $advert->setTitle('Recherche développeur Symfony2.');
+    $advert->setAuthor('Timothy Khoury');
+    $advert->setContent("Nous recherchons un développeur Symfony2 débutant sur Lyon. Blabla…");
 
-    if ($request->isMethod('POST')) {
+    // Création de l'entité Image
+    $image = new Image();
+    $image->setUrl('http://sdz-upload.s3.amazonaws.com/prod/upload/job-de-reve.jpg');
+    $image->setAlt('Job de rêve');
 
-      $request->getSession()->getFlashBag()->add('notice', 'Annonce bien enregistrée.');
+    $advert->setImage($image);
 
-      return $this->redirect($this->generateUrl('presentation_view', array('id' => 5)));
-    }
+    $em = $this->getDoctrine()->getManager();
 
-    // Si on n'est pas en POST, alors on affiche le formulaire
-    return $this->render('PresentationBundle:Advert:add.html.twig');
+    $em->persist($advert);
+
+    $em->flush();
+
+    return $this->render('PresentationBundle:Advert:view.html.twig',array(
+      'advert' => $advert
+      ));
+
   }
 
   public function editAction($id, Request $request)
