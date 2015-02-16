@@ -1,0 +1,7 @@
+app:
+    resource: @AppBundle/Controller/
+    type:     annotation	
+
+presentation:
+    resource: "@PresentationBundle/Resources/config/routing.yml"
+    prefix:   /platform

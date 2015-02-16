@@ -1,0 +1,27 @@
+presentation_home:
+    path: /{page}
+    defaults: {_controller: PresentationBundle:Advert:index, page: 1 }
+    requirements:
+       page : \d*
+
+presentation_view:
+    path : /advert/{id}
+    defaults: {_controller : PresentationBundle:Advert:view }
+    requirements :
+       id : \d+
+
+presentation_add:
+    path:      /add
+    defaults:  { _controller: PresentationBundle:Advert:add }
+
+presentation_edit:
+    path:      /edit/{id}
+    defaults:  { _controller: PresentationBundle:Advert:edit }
+    requirements:
+        id: \d+
+
+presentation_delete:
+    path:      /delete/{id}
+    defaults:  { _controller: PresentationBundle:Advert:delete }
+    requirements:
+        id: \d+
