@@ -6,17 +6,26 @@
     <title>Bienvenue sur ma première page avec OpenClassrooms !</title>
   </head>
   <body>
-    <h1>Affichage d'une annonce</h1>
+    <h1>Affichage des annonces</h1>
+
+    <p> 
+      <ul>
+        {% for advert in listAdverts %}
+
+
+         <li>{{ advert.title }}</li>
+         <li>{{ advert.author }}</li>
+         <li>{{ advert.content }}</li>    
+          {% if advert.image is not null %}
+            <img src="{{ advert.image.url }}" alt="{{ advert.image.alt }}">
+          {% endif %}
+
+        {% endfor %}
+      </ul>
 
     <p>
-      {{ advert.id }} / {{ advert.title }}
-      {{ advert.content }}
-      {{ advert.author }}
-    <p>
 
-      {% if advert.image is not null %}
-      <img src="{{ advert.image.url }}" alt="{{ advert.image.alt }}">
-      {% endif %}
+
 
     </p>
 

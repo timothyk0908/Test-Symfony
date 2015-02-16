@@ -1,131 +1,128 @@
 <?php
-
 // src/OC/PlatformBundle/Controller/AdvertController.php
 
 namespace TK\PresentationBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-
-use TK\PresentationBundle\Entity\Advert;
-use TK\PresentationBundle\Entity\Image;
 
 class AdvertController extends Controller
 {
-
-
   public function indexAction($page)
   {
+    if ($page < 1) {
+      throw $this->createNotFoundException("La page ".$page." n'existe pas.");
+    }
 
-  	  $listAdverts = array(
-      array(
-        'title'   => 'Recherche développpeur Symfony2',
-        'id'      => 1,
-        'author'  => 'Alexandre',
-        'content' => 'Nous recherchons un développeur Symfony2 débutant sur Lyon. Blabla…',
-        'date'    => new \Datetime()),
-      array(
-        'title'   => 'Mission de webmaster',
-        'id'      => 2,
-        'author'  => 'Hugo',
-        'content' => 'Nous recherchons un webmaster capable de maintenir notre site internet. Blabla…',
-        'date'    => new \Datetime()),
-      array(
-        'title'   => 'Offre de stage webdesigner',
-        'id'      => 3,
-        'author'  => 'Mathieu',
-        'content' => 'Nous proposons un poste pour webdesigner. Blabla…',
-        'date'    => new \Datetime())
-    );
+    // Ici je fixe le nombre d'annonces par page à 3
+    // Mais bien sûr il faudrait utiliser un paramètre, et y accéder via $this->container->getParameter('nb_per_page')
+    $nbPerPage = 3;
 
+    // On récupère notre objet Paginator
+    $listAdverts = $this->getDoctrine()
+      ->getManager()
+      ->getRepository('PresentationBundle:Advert')
+      ->getAdverts($page, $nbPerPage)
+    ;
 
+    // On calcule le nombre total de pages grâce au count($listAdverts) qui retourne le nombre total d'annonces
+    $nbPages = ceil(count($listAdverts)/$nbPerPage);
+
+    // Si la page n'existe pas, on retourne une 404
+    if ($page > $nbPages) {
+      throw $this->createNotFoundException("La page ".$page." n'existe pas.");
+    }
+
+    // On donne toutes les informations nécessaires à la vue
     return $this->render('PresentationBundle:Advert:index.html.twig', array(
-    'listAdverts' => $listAdverts
-  ));
+      'listAdverts' => $listAdverts,
+      'nbPages'     => $nbPages,
+      'page'        => $page
+    ));
+
 
   }
 
-   public function menuAction($limit)
+
+  public function addAction(Request $request)
   {
-    // On fixe en dur une liste ici, bien entendu par la suite
-    // on la récupérera depuis la BDD !
-    $listAdverts = array(
-      array('id' => 2, 'title' => 'Recherche développeur Symfony2'),
-      array('id' => 5, 'title' => 'Mission de webmaster'),
-      array('id' => 9, 'title' => 'Offre de stage webdesigner')
+    // La gestion d'un formulaire est particulière, mais l'idée est la suivante :
+
+    if ($request->isMethod('POST')) {
+      // Ici, on s'occupera de la création et de la gestion du formulaire
+
+      $request->getSession()->getFlashBag()->add('info', 'Annonce bien enregistrée.');
+
+      // Puis on redirige vers la page de visualisation de cet article
+      return $this->redirect($this->generateUrl('presentation_view', array('id' => 1)));
+    }
+
+    // Si on n'est pas en POST, alors on affiche le formulaire
+    return $this->render('PresentationBundle:Advert:add.html.twig');
+  }
+
+  public function editAction($id)
+  {
+    // On récupère l'EntityManager
+    $em = $this->getDoctrine()->getManager();
+
+    // On récupère l'entité correspondant à l'id $id
+    $advert = $em->getRepository('PresentationBundle:Advert')->find($id);
+
+    // Si l'annonce n'existe pas, on affiche une erreur 404
+    if ($advert == null) {
+      throw $this->createNotFoundException("L'annonce d'id ".$id." n'existe pas.");
+    }
+
+    // Ici, on s'occupera de la création et de la gestion du formulaire
+
+    return $this->render('PresentationBundle:Advert:edit.html.twig', array(
+      'advert' => $advert
+    ));
+  }
+
+  public function deleteAction($id, Request $request)
+  {
+    // On récupère l'EntityManager
+    $em = $this->getDoctrine()->getManager();
+
+    // On récupère l'entité correspondant à l'id $id
+    $advert = $em->getRepository('PresentationBundle:Advert')->find($id);
+
+    // Si l'annonce n'existe pas, on affiche une erreur 404
+    if ($advert == null) {
+      throw $this->createNotFoundException("L'annonce d'id ".$id." n'existe pas.");
+    }
+
+    if ($request->isMethod('POST')) {
+      // Si la requête est en POST, on deletea l'article
+
+      $request->getSession()->getFlashBag()->add('info', 'Annonce bien supprimée.');
+
+      // Puis on redirige vers l'accueil
+      return $this->redirect($this->generateUrl('presentation_home'));
+    }
+
+    // Si la requête est en GET, on affiche une page de confirmation avant de delete
+    return $this->render('PresentationBundle:Advert:delete.html.twig', array(
+      'advert' => $advert
+    ));
+  }
+
+  public function menuAction($limit = 3)
+  {
+    $listAdverts = $this->getDoctrine()
+      ->getManager()
+      ->getRepository('PresentationBundle:Advert')
+      ->findBy(
+        array(),                 // Pas de critère
+        array('date' => 'desc'), // On trie par date décroissante
+        $limit,                  // On sélectionne $limit annonces
+        0                        // À partir du premier
     );
 
     return $this->render('PresentationBundle:Advert:menu.html.twig', array(
       'listAdverts' => $listAdverts
     ));
-  }
-
-  public function viewAction($id)
-  {
-    {
-    // On récupère le repository
-     $advert = $this->getDoctrine()
-      ->getManager()
-      ->find('PresentationBundle:Advert', $id);
-
-    // $advert est donc une instance de OC\PlatformBundle\Entity\Advert
-    // ou null si l'id $id  n'existe pas, d'où ce if :
-    if (null === $advert) {
-      throw new NotFoundHttpException("L'annonce d'id ".$id." n'existe pas.");
-    }
-
-    // Le render ne change pas, on passait avant un tableau, maintenant un objet
-    return $this->render('PresentationBundle:Advert:view.html.twig', array(
-      'advert' => $advert,
-      'id' => $id
-    ));
-  }
-  }
-
-  public function addAction(Request $request)
-  {
-    $advert = new Advert();
-    $advert->setTitle('Recherche développeur Symfony2.');
-    $advert->setAuthor('Timothy Khoury');
-    $advert->setContent("Nous recherchons un développeur Symfony2 débutant sur Lyon. Blabla…");
-
-    // Création de l'entité Image
-    $image = new Image();
-    $image->setUrl('http://sdz-upload.s3.amazonaws.com/prod/upload/job-de-reve.jpg');
-    $image->setAlt('Job de rêve');
-
-    $advert->setImage($image);
-
-    $em = $this->getDoctrine()->getManager();
-
-    $em->persist($advert);
-
-    $em->flush();
-
-    return $this->render('PresentationBundle:Advert:view.html.twig',array(
-      'advert' => $advert
-      ));
-
-  }
-
-  public function editAction($id, Request $request)
-  {
-    // Ici, on récupérera l'annonce correspondante à $id
-
-    // Même mécanisme que pour l'ajout
-    if ($request->isMethod('POST')) {
-      $request->getSession()->getFlashBag()->add('notice', 'Annonce bien modifiée.');
-
-      return $this->redirect($this->generateUrl('presentation_view', array('id' => $id)));
-    }
-
-    return $this->render('PresentationBundle:Advert:edit.html.twig');
-  }
-
-  public function deleteAction($id)
-  {
-
-    return $this->render('PresentationBundle:Advert:delete.html.twig',array('id' => $id));
   }
 }
