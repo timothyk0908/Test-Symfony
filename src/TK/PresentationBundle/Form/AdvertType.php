@@ -5,6 +5,8 @@ namespace TK\PresentationBundle\Form;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 
 class AdvertType extends AbstractType
@@ -16,12 +18,39 @@ class AdvertType extends AbstractType
       ->add('title',     'text')
       ->add('author',    'text')
       ->add('content',   'textarea')
-      ->add('published', 'checkbox', array('required' => false))
-      ->add('image',     new ImageType())
+      ->add('image',      new ImageType())
+      ->add('categories', 'entity', array(
+        'class'    => 'PresentationBundle:Category',
+        'property' => 'name',
+        'multiple' => true,
+        'expanded' => false
+      ))
       ->add('save',      'submit')
     ;
+
+    // On ajoute une fonction qui va écouter l'évènement PRE_SET_DATA
+    $builder->addEventListener(
+      FormEvents::PRE_SET_DATA,
+      function(FormEvent $event) {
+        // On récupère notre objet Advert sous-jacent
+        $advert = $event->getData();
+
+        if (null === $advert) {
+          return;
+        }
+
+        if (!$advert->getPublished() || null === $advert->getId()) {
+          $event->getForm()->add('published', 'checkbox', array('required' => false));
+        } else {
+          $event->getForm()->remove('published');
+        }
+      }
+    );
   }
 
+  /**
+   * @param OptionsResolverInterface $resolver
+   */
   public function setDefaultOptions(OptionsResolverInterface $resolver)
   {
     $resolver->setDefaults(array(
@@ -29,6 +58,9 @@ class AdvertType extends AbstractType
     ));
   }
 
+  /**
+   * @return string
+   */
   public function getName()
   {
     return 'tk_presentationbundle_advert';

@@ -14,9 +14,10 @@
          <li>{{ advert.title }}</li>
          <li>{{ advert.author }}</li>
          <li>{{ advert.content }}</li>    
-          {% if advert.image is not null %}
-            <img src="{{ advert.image.url }}" alt="{{ advert.image.alt }}">
-          {% endif %}
+          <img
+             src="{{ asset(advert.image.webPath) }}"
+             alt="{{ advert.image.alt }}"
+          />
       </ul>
 
     <p>

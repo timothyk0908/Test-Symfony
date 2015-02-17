@@ -6,18 +6,18 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 
-class ImageType extends AbstractType
+class CategoryType extends AbstractType
 {
     /**
      * @param FormBuilderInterface $builder
      * @param array $options
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
-  {
-    $builder
-      ->add('file', 'file')
-    ;
-  }
+    {
+        $builder
+            ->add('name',    'text')
+        ;
+    }
     
     /**
      * @param OptionsResolverInterface $resolver
@@ -25,7 +25,7 @@ class ImageType extends AbstractType
     public function setDefaultOptions(OptionsResolverInterface $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => 'TK\PresentationBundle\Entity\Image'
+            'data_class' => 'TK\PresentationBundle\Entity\Category'
         ));
     }
 
@@ -34,6 +34,6 @@ class ImageType extends AbstractType
      */
     public function getName()
     {
-        return 'tk_presentationbundle_image';
+        return 'tk_presentationbundle_category';
     }
 }
