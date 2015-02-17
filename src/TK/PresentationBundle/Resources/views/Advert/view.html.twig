@@ -13,11 +13,15 @@
 
          <li>{{ advert.title }}</li>
          <li>{{ advert.author }}</li>
-         <li>{{ advert.content }}</li>    
-          <img
-             src="{{ asset(advert.image.webPath) }}"
-             alt="{{ advert.image.alt }}"
-          />
+         <li>{{ advert.content }}</li>
+
+         {% if advert.image != null %}
+  
+          localhost:8888{{ app.request.basepath }}/{{ advert.image.webPath }}
+
+         <img src="localhost:8888/{{ app.request.basepath }}/{{ asset(advert.image.webPath) }}" alt="{{ advert.image.alt }}"/>
+          {% endif %}
+
       </ul>
 
     <p>

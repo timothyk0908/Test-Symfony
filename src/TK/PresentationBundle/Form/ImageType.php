@@ -5,6 +5,8 @@ namespace TK\PresentationBundle\Form;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
+use TK\PresentationBundle\Entity\Image;
+
 
 class ImageType extends AbstractType
 {
@@ -13,11 +15,11 @@ class ImageType extends AbstractType
      * @param array $options
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
-  {
+    {
     $builder
       ->add('file', 'file')
     ;
-  }
+    }
     
     /**
      * @param OptionsResolverInterface $resolver

@@ -4,6 +4,8 @@ namespace TK\PresentationBundle\Entity;
 
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Tools\Pagination\Paginator;
+use TK\PresentationBundle\Entity\Image;
+
 
 /**
  * AdvertRepository

@@ -86,10 +86,10 @@ class Image
         return $this->alt;
     }
 
-  private $file;
+  public $file;
 
   // On ajoute cet attribut pour y stocker le nom du fichier temporairement
-  private $tempFilename;
+  public $tempFilename;
 
   // On modifie le setter de File, pour prendre en compte l'upload d'un fichier lorsqu'il en existe déjà un autre
   public function setFile(UploadedFile $file)
