@@ -3,8 +3,11 @@
 
 namespace TK\PresentationBundle\Controller;
 
+
+use TK\PresentationBundle\Entity\Advert;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
+use TK\PresentationBundle\Form\AdvertType;
 
 class AdvertController extends Controller
 {
@@ -44,37 +47,72 @@ class AdvertController extends Controller
   }
 
 
+
   public function addAction(Request $request)
   {
-    // La gestion d'un formulaire est particulière, mais l'idée est la suivante :
+    
+   $advert = new Advert();
+   $form = $this->createForm(new AdvertType(), $advert);
 
-    if ($request->isMethod('POST')) {
-      // Ici, on s'occupera de la création et de la gestion du formulaire
+    if ($form->handleRequest($request)->isValid()) {
+      $em = $this->getDoctrine()->getManager();
+      $em->persist($advert);
+      $em->flush(); 
 
-      $request->getSession()->getFlashBag()->add('info', 'Annonce bien enregistrée.');
+      $request->getSession()->getFlashBag()->add('notice', 'Annonce bien enregistrée.');
 
-      // Puis on redirige vers la page de visualisation de cet article
-      return $this->redirect($this->generateUrl('presentation_view', array('id' => 1)));
+      return $this->redirect($this->generateUrl('presentation_view', array('id' => $advert->getId())));
     }
 
-    // Si on n'est pas en POST, alors on affiche le formulaire
-    return $this->render('PresentationBundle:Advert:add.html.twig');
+    return $this->render('PresentationBundle:Advert:add.html.twig', array(
+      'form' => $form->createView(),
+    ));
+      
   }
 
-  public function editAction($id)
+  public function viewAction($id)
   {
     // On récupère l'EntityManager
     $em = $this->getDoctrine()->getManager();
 
-    // On récupère l'entité correspondant à l'id $id
+    // Pour récupérer une annonce unique : on utilise find()
     $advert = $em->getRepository('PresentationBundle:Advert')->find($id);
 
-    // Si l'annonce n'existe pas, on affiche une erreur 404
-    if ($advert == null) {
+    // On vérifie que l'annonce avec cet id existe bien
+    if ($advert === null) {
       throw $this->createNotFoundException("L'annonce d'id ".$id." n'existe pas.");
     }
 
-    // Ici, on s'occupera de la création et de la gestion du formulaire
+    // On récupère la liste des advertSkill pour l'annonce $advert
+    $listAdvertSkills = $em->getRepository('PresentationBundle:AdvertSkill')->findByAdvert($advert);
+
+    // Puis modifiez la ligne du render comme ceci, pour prendre en compte les variables :
+    return $this->render('PresentationBundle:Advert:view.html.twig', array(
+      'advert'           => $advert,
+      'listAdvertSkills' => $listAdvertSkills,
+    ));
+  }
+
+
+  public function editAction($id)
+  {
+
+    $advert = $this->getDoctrine()
+      ->getManager()
+      ->getRepository('PresentationBundle:Advert')
+      ->find($id)
+;
+
+      $formBuilder = $this->get('form.factory')->createBuilder('form', $advert)
+      ->add('date',       'date')
+      ->add('title',      'text')
+      ->add('content',    'textarea')
+      ->add('author',     'text')
+      ->add('published',  'checkbox',array('required' => false))
+      ->add('save',       'submit')
+      ->getForm()
+     ; 
+
 
     return $this->render('PresentationBundle:Advert:edit.html.twig', array(
       'advert' => $advert

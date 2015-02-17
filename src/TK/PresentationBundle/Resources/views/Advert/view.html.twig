@@ -10,8 +10,6 @@
 
     <p> 
       <ul>
-        {% for advert in listAdverts %}
-
 
          <li>{{ advert.title }}</li>
          <li>{{ advert.author }}</li>
@@ -19,8 +17,6 @@
           {% if advert.image is not null %}
             <img src="{{ advert.image.url }}" alt="{{ advert.image.alt }}">
           {% endif %}
-
-        {% endfor %}
       </ul>
 
     <p>
